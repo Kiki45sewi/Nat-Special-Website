@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You Are Loved & Appreciated</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f0c1b 0%, #1a1528 40%, #2a1b3d 70%, #170d24 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #f3e8ff;
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Ambient glowing backdrop */
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(168,85,247,0.1) 40%, rgba(0,0,0,0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        /* SVG Flower Floating & Glowing Animations */
+        .flower-container {
+            position: relative;
+            z-index: 10;
+            filter: drop-shadow(0 0 25px rgba(216, 180, 254, 0.4));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        .petal-pulse {
+            transform-origin: center;
+            animation: petalBloom 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes petalBloom {
+            0% { transform: scale(0.98); }
+            100% { transform: scale(1.03); }
+        }
+
+        /* Sparkle Particle Styling */
+        .sparkle-particle {
+            position: absolute;
+            pointer-events: none;
+            background: radial-gradient(circle, #fef08a 0%, rgba(244,114,182,0.8) 50%, rgba(255,255,255,0) 100%);
+            border-radius: 50%;
+            animation: particleFade 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            z-index: 50;
+        }
+
+        @keyframes particleFade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--dx), var(--dy)) scale(0.2);
+            }
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Starry background canvas */
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between items-center px-4 py-8 relative selection:bg-pink-500 selection:text-white">
+
+    <canvas id="stars-canvas"></canvas>
+    <div class="ambient-glow"></div>
+
+    <!-- Top Music & Sound Toggle Button -->
+    <div class="z-20 w-full max-w-4xl flex justify-between items-center mb-4">
+        <div class="text-xs uppercase tracking-widest text-pink-300/60 font-semibold flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            Non-Profit Sanctuary
+        </div>
+        <button id="audioBtn" class="glass-card px-4 py-2 rounded-full text-xs font-medium text-pink-200 hover:text-white hover:bg-white/10 transition-all duration-300 flex items-center gap-2 border border-pink-500/20 shadow-lg">
+            <svg id="musicIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+            </svg>
+            <span id="audioStatus">Play Calm Music</span>
+        </button>
+    </div>
+
+    <header class="z-10 w-full max-w-3xl text-center my-4">
+        <div class="glass-card p-6 md:p-8 rounded-3xl relative overflow-hidden transition-all duration-500 hover:border-pink-500/30">
+            <div class="absolute -top-12 -left-12 w-24 h-24 bg-pink-500/10 rounded-full blur-xl"></div>
+            <p class="text-xs md:text-sm font-semibold tracking-widest text-pink-300/80 uppercase mb-2">A Gentle Reminder</p>
+            <h1 class="text-xl md:text-3xl font-light leading-relaxed text-amber-100 tracking-wide">
+                "keep it up, dont give up, i believe in u and ill always do, im not the only one who thinks that"
+            </h1>
+        </div>
+    </header>
+
+    <main class="z-10 my-8 flex flex-col items-center justify-center w-full max-w-4xl">
+        <div id="flowerClickArea" class="flower-container cursor-pointer select-none group relative p-4" title="Click to bloom sparkles!">
+            
+            <!-- Floating hint badge -->
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50 text-pink-200 text-xs py-1 px-3 rounded-full backdrop-blur-md pointer-events-none whitespace-nowrap border border-pink-500/20">
+                ✨ Tap the flowers ✨
+            </div>
+
+            <!-- SVG Animated Floral Composition -->
+            <svg class="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-transform duration-500 group-hover:scale-105" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <!-- Petal Gradients -->
+                    <linearGradient id="petalGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#f472b6" />
+                        <stop offset="50%" stop-color="#c084fc" />
+                        <stop offset="100%" stop-color="#818cf8" />
+                    </linearGradient>
+
+                    <linearGradient id="petalGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fb7185" />
+                        <stop offset="100%" stop-color="#e879f9" />
+                    </linearGradient>
+
+                    <linearGradient id="centerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fef08a" />
+                        <stop offset="100%" stop-color="#f59e0b" />
+                    </linearGradient>
+
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="10" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+
+                <!-- Background Soft Stem Leaves -->
+                <path d="M 220 380 Q 180 340 130 360 Q 170 410 220 380 Z" fill="#34d399" opacity="0.6" />
+                <path d="M 280 380 Q 320 340 370 360 Q 330 410 280 380 Z" fill="#34d399" opacity="0.6" />
+
+                <!-- Main Center Giant Flower Group -->
+                <g class="petal-pulse" filter="url(#glow)">
+                    <!-- Outer Petals Layer -->
+                    <g fill="url(#petalGrad1)" opacity="0.9">
+                        <ellipse cx="250" cy="150" rx="35" ry="85" />
+                        <ellipse cx="250" cy="350" rx="35" ry="85" />
+                        <ellipse cx="150" cy="250" rx="85" ry="35" />
+                        <ellipse cx="350" cy="250" rx="85" ry="35" />
+                        <ellipse cx="179" cy="179" rx="35" ry="85" transform="rotate(-45 179 179)" />
+                        <ellipse cx="321" cy="321" rx="35" ry="85" transform="rotate(-45 321 321)" />
+                        <ellipse cx="321" cy="179" rx="35" ry="85" transform="rotate(45 321 179)" />
+                        <ellipse cx="179" cy="321" rx="35" ry="85" transform="rotate(45 179 321)" />
+                    </g>
+
+                    <!-- Inner Petals Layer (Offset Rotated) -->
+                    <g fill="url(#petalGrad2)" opacity="0.95">
+                        <ellipse cx="250" cy="170" rx="25" ry="65" transform="rotate(22.5 250 250)" />
+                        <ellipse cx="250" cy="330" rx="25" ry="65" transform="rotate(22.5 250 250)" />
+                        <ellipse cx="170" cy="250" rx="65" ry="25" transform="rotate(22.5 250 250)" />
+                        <ellipse cx="330" cy="250" rx="65" ry="25" transform="rotate(22.5 250 250)" />
+                        <ellipse cx="250" cy="170" rx="25" ry="65" transform="rotate(-22.5 250 250)" />
+                        <ellipse cx="250" cy="330" rx="25" ry="65" transform="rotate(-22.5 250 250)" />
+                        <ellipse cx="170" cy="250" rx="65" ry="25" transform="rotate(-22.5 250 250)" />
+                        <ellipse cx="330" cy="250" rx="65" ry="25" transform="rotate(-22.5 250 250)" />
+                    </g>
+
+                    <!-- Golden Flower Core -->
+                    <circle cx="250" cy="250" r="42" fill="url(#centerGrad)" />
+                    <circle cx="250" cy="250" r="32" fill="#fef08a" opacity="0.5" />
+                    
+                    <!-- Core Stamen Detail Dots -->
+                    <circle cx="235" cy="240" r="3" fill="#78350f" opacity="0.7" />
+                    <circle cx="260" cy="242" r="2.5" fill="#78350f" opacity="0.7" />
+                    <circle cx="245" cy="260" r="3.5" fill="#78350f" opacity="0.7" />
+                    <circle cx="258" cy="258" r="2" fill="#78350f" opacity="0.7" />
+                </g>
+
+                <!-- Floating Accent Side Flowers -->
+                <!-- Left Smaller Flower -->
+                <g transform="translate(-100, -20) scale(0.4)" opacity="0.85">
+                    <g fill="url(#petalGrad2)">
+                        <circle cx="250" cy="190" r="30" />
+                        <circle cx="250" cy="310" r="30" />
+                        <circle cx="190" cy="250" r="30" />
+                        <circle cx="310" cy="250" r="30" />
+                    </g>
+                    <circle cx="250" cy="250" r="25" fill="url(#centerGrad)" />
+                </g>
+
+                <!-- Right Smaller Flower -->
+                <g transform="translate(110, 40) scale(0.35)" opacity="0.85">
+                    <g fill="url(#petalGrad1)">
+                        <circle cx="250" cy="190" r="30" />
+                        <circle cx="250" cy="310" r="30" />
+                        <circle cx="190" cy="250" r="30" />
+                        <circle cx="310" cy="250" r="30" />
+                    </g>
+                    <circle cx="250" cy="250" r="25" fill="url(#centerGrad)" />
+                </g>
+            </svg>
+        </div>
+
+        <div class="glass-card mt-6 p-8 sm:p-10 rounded-3xl max-w-2xl text-center relative border border-purple-300/10">
+            <div class="text-pink-300/40 text-4xl mb-2 handwritten">"</div>
+            <p class="text-lg sm:text-2xl font-light text-purple-100 leading-relaxed italic">
+                wish the world aprecciates you the way i do, ur very important and loved by everyone, especially for me even though we hadn't meet yet, i feel like this is not the first time we know in this world
+            </p>
+            <div class="mt-6 flex justify-center items-center gap-2">
+                <span class="w-8 h-[1px] bg-pink-400/30"></span>
+                <span class="text-pink-300 text-xs font-light tracking-widest uppercase">Always with you</span>
+                <span class="w-8 h-[1px] bg-pink-400/30"></span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="z-10 text-center text-xs text-purple-300/50 mt-8 mb-2 font-light">
+        <p>A quiet place created to bring comfort to your heart.</p>
+    </footer>
+
+    <script>
+        // --- Starry Canvas Background Logic ---
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 8000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.01 + 0.003
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.speed = -star.speed;
+                }
+                ctx.fillStyle = `rgba(243, 232, 255, ${Math.abs(star.alpha)})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        drawStars();
+
+        // --- Interactive Sparkles on Click ---
+        const flowerContainer = document.getElementById('flowerClickArea');
+
+        flowerContainer.addEventListener('click', (e) => {
+            const rect = flowerContainer.getBoundingClientRect();
+            const count = 16; // Number of particles per click
+
+            // Gentle chime effect on click
+            playChimeSound();
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'sparkle-particle';
+                
+                // Randomize particle size
+                const size = Math.random() * 8 + 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                // Calculate center click position relative to screen
+                const clickX = e.clientX;
+                const clickY = e.clientY;
+
+                particle.style.left = `${clickX}px`;
+                particle.style.top = `${clickY}px`;
+
+                // Angle and movement distance
+                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5);
+                const distance = Math.random() * 100 + 50;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
+
+                document.body.appendChild(particle);
+
+                // Remove DOM element after animation ends
+                setTimeout(() => {
+                    particle.remove();
+                }, 1200);
+            }
+        });
+
+        // --- Ambient Sound Synth (Tone.js) ---
+        let isPlaying = false;
+        let polySynth = null;
+        let loopEvent = null;
+
+        function initAudio() {
+            if (!polySynth) {
+                // Soft ambient synth configuration
+                polySynth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: 'sine' },
+                    envelope: {
+                        attack: 1.5,
+                        decay: 2,
+                        sustain: 0.6,
+                        release: 3
+                    }
+                }).toDestination();
+
+                const reverb = new Tone.Reverb({ decay: 5, wet: 0.5 }).toDestination();
+                polySynth.connect(reverb);
+                polySynth.volume.value = -12;
+            }
+        }
+
+        function playChimeSound() {
+            if (typeof Tone !== 'undefined') {
+                const chime = new Tone.Synth({
+                    oscillator: { type: 'triangle' },
+                    envelope: { attack: 0.01, decay: 0.8, sustain: 0, release: 0.8 }
+                }).toDestination();
+                chime.volume.value = -10;
+                const notes = ['C5', 'E5', 'G5', 'B5', 'C6'];
+                const randomNote = notes[Math.floor(Math.random() * notes.length)];
+                chime.triggerAttackRelease(randomNote, '8n');
+            }
+        }
+
+        const audioBtn = document.getElementById('audioBtn');
+        const audioStatus = document.getElementById('audioStatus');
+
+        audioBtn.addEventListener('click', async () => {
+            await Tone.start();
+            initAudio();
+
+            if (!isPlaying) {
+                isPlaying = true;
+                audioStatus.textContent = "Pause Music";
+                
+                // Ambient soft chord sequence (Cmaj7 / Am7 vibe)
+                const chords = [
+                    ['C4', 'E4', 'G4', 'B4'],
+                    ['A3', 'C4', 'E4', 'G4'],
+                    ['F3', 'A3', 'C4', 'E4'],
+                    ['G3', 'B3', 'D4', 'F#4']
+                ];
+
+                let chordIdx = 0;
+                loopEvent = new Tone.Loop((time) => {
+                    polySynth.triggerAttackRelease(chords[chordIdx], '3n', time);
+                    chordIdx = (chordIdx + 1) % chords.length;
+                }, '2m').start(0);
+
+                Tone.Transport.bpm.value = 60;
+                Tone.Transport.start();
+            } else {
+                isPlaying = false;
+                audioStatus.textContent = "Play Calm Music";
+                Tone.Transport.stop();
+                if (loopEvent) loopEvent.dispose();
+            }
+        });
+    </script>
+</body>
+</html>
+
